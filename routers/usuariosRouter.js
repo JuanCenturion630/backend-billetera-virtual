@@ -2,9 +2,10 @@ const express = require('express');
 const usuariosRouter = express.Router();
 const UsuariosController = require('../controllers/usuariosController'); //Importar la clase "usuariosService".
 const usuarioControlador = new UsuariosController(); //Instanciar la clase "usuariosService".
+const verifyToken = require("../middleware/verifyToken");
 
 usuariosRouter.post('/crear-usuario', usuarioControlador.crearUsuario);
-usuariosRouter.post('/login', usuarioControlador.login);
+usuariosRouter.post('/login', verifyToken, usuarioControlador.login);
 usuariosRouter.post('/buscar-usuario', usuarioControlador.buscarUsuario);
 usuariosRouter.post('/listar-usuarios', usuarioControlador.listarUsuariosExcluyendoLogeado);
 usuariosRouter.post('/transferir-saldo', usuarioControlador.transferirSaldo);

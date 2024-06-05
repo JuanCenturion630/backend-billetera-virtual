@@ -8,7 +8,6 @@ const transaccionesORM = require('./models/transacciones'); //Referencia al mode
 
 //AWS-Cognito:
 const cors = require('cors');
-const verifyToken = require("./middleware/verifyToken");
 
 //Servidor Express:
 const express = require('express'); //Referencia al módulo express.
@@ -20,10 +19,11 @@ app.get('/', (res) => { res.send('A ver dijo el ciego.'); }); //Endpoint por def
 const usuariosRouters = require('./routers/usuariosRouter');
 const transaccionesRouters = require('./routers/transaccionesRouter');
 
-//Usar rutas: app.use(cors());
+//Usar rutas: 
+app.use(cors());
 app.use(express.json()); //Convierte las solicitudes del cliente en JSON.
-app.use('/usuarios', usuariosRouters);
-app.use('/transacciones', transaccionesRouters);
+app.use('/usuarios',usuariosRouters);
+app.use('/transacciones',transaccionesRouters);
 
 //Sincronizo los modelos con la base de datos:
 async function sincronizarBaseDeDatos() {
