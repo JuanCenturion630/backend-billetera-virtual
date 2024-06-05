@@ -1,10 +1,13 @@
-CREATE DATABASE BizonBD;
-USE BizonBD;
+CREATE DATABASE bizonbd;
+USE bizonbd;
 
+DROP DATABASE bizonbd;
 SELECT * FROM usuarios;
-
-ALTER TABLE usuarios
-DROP COLUMN updatedAt;
+SELECT * FROM transacciones;
+UPDATE usuarios SET saldo=saldo+25000 WHERE email="centurion.juan128@gmail.com";
+INSERT INTO transacciones(fecha,monto,descripcion,categoria,emisor_id,receptor_id,createdAt,updatedAt) 
+VALUES ("2024-06-05 00:59:00",300,"Probando","Test",1,2,"2024-06-05 00:00:00","2024-06-05 00:00:01");
+SHOW CREATE TABLE transacciones;
 
 CREATE TABLE usuarios (
 	id BIGINT PRIMARY KEY AUTO_INCREMENT,
