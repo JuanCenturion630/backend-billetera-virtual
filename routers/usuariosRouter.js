@@ -5,12 +5,11 @@ const usuarioControlador = new UsuariosController(); //Instanciar la clase "usua
 const verifyToken = require("../middleware/verifyToken");
 
 usuariosRouter.post('/crear-usuario', usuarioControlador.crearUsuario);
-usuariosRouter.post('/login', usuarioControlador.login);
-usuariosRouter.get('/buscar-usuario/:busqueda', usuarioControlador.buscarUsuario); //"busqueda": email, alias o CVU.
-usuariosRouter.get('/listar-usuarios/:idExcluido', usuarioControlador.listarUsuariosExcluyendoLogeado);
-
-usuariosRouter.put('/sumar-saldo', usuarioControlador.sumarSaldo);
-usuariosRouter.put('/restar-saldo', usuarioControlador.restarSaldo);
-usuariosRouter.put('/transferir-saldo', usuarioControlador.transferirSaldo);
+usuariosRouter.post('/login', verifyToken, usuarioControlador.login);
+usuariosRouter.get('/buscar-usuario/:busqueda', verifyToken, usuarioControlador.buscarUsuario); //"busqueda": email, alias o CVU.
+usuariosRouter.get('/listar-usuarios/:idExcluido', verifyToken, usuarioControlador.listarUsuariosExcluyendoLogeado);
+usuariosRouter.put('/sumar-saldo', verifyToken, usuarioControlador.sumarSaldo);
+usuariosRouter.put('/restar-saldo', verifyToken, usuarioControlador.restarSaldo);
+usuariosRouter.put('/transferir-saldo', verifyToken, usuarioControlador.transferirSaldo);
 
 module.exports = usuariosRouter;
