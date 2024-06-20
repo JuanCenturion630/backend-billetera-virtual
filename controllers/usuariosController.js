@@ -56,7 +56,7 @@ class UsuariosController {
    */
   async buscarUsuario(req, res) {
     try {
-      const { busqueda } = req.body;
+      const busqueda = req.params.busqueda; //email, alias o CVU.
       const resultado = await usuarioServicio.buscarUsuario(busqueda);
       res.status(201).json({
         descripcion: "Resultados encontrados.",
@@ -78,7 +78,7 @@ class UsuariosController {
    */
   async listarUsuariosExcluyendoLogeado(req, res) {
     try {
-      const { idUsuarioLogeado } = req.body;
+      const idUsuarioLogeado = req.params.idExcluido;
       const listadoUsuarios = await usuarioServicio.listarUsuariosExcluyendoLogeado(idUsuarioLogeado);
       res.status(201).json({
         descripcion: "Listado de usuarios.",
@@ -100,11 +100,16 @@ class UsuariosController {
    */
   async transferirSaldo(req, res) {
     try {
+      /**
+       * emisor: email, alias o CVU.
+       * receptor: email, alias, o CVU.
+       */
       const { emisor, receptor, monto } = req.body;
       const resultado = await usuarioServicio.transferirSaldo(emisor, receptor, monto);
       res.status(201).json({
         descripcion: "Transferencia exitosa.",
-        transferencia: resultado
+        transferencia: resultado.transferir,
+        transaccion: resultado.transaccion
       });
     } catch(error) {
       res.status(401).json({ 
@@ -122,15 +127,39 @@ class UsuariosController {
    */
   async sumarSaldo(req, res) {
     try {
-      const { usuario, saldo } = req.body;
+      const { usuario, saldo } = req.body; //usuario: email, alias o CVU.
       const resultado = await usuarioServicio.sumarSaldo(usuario, saldo);
       res.status(201).json({
         usuario: usuario,
-        saldo: resultado
+        saldo: resultado.saldo,
+        transaccion: resultado.transaccion
       });
     } catch(error) {
       res.status(401).json({ 
         descripcion: "Error al agregar saldo.",
+        detalles: error.message
+      });
+      //console.error('Error en usuariosController.js (sumarSaldo):', error); //Comunica por consola si el error ocurre aquí.
+    }
+  }
+
+  /**
+   * Controla la conexión del front con tranferir saldo entre usuarios.
+   * @param {*} req: JSON que recibe del frontend.
+   * @param {*} res: JSON que se envía al frontend.
+   */
+  async restarSaldo(req, res) {
+    try {
+      const { usuario, saldo } = req.body; //usuario: email, alias o CVU.
+      const resultado = await usuarioServicio.restarSaldo(usuario, saldo);
+      res.status(201).json({
+        usuario: usuario,
+        saldo: resultado.saldo,
+        transaccion: resultado.transaccion
+      });
+    } catch(error) {
+      res.status(401).json({ 
+        descripcion: "Error al retirar saldo.",
         detalles: error.message
       });
       //console.error('Error en usuariosController.js (sumarSaldo):', error); //Comunica por consola si el error ocurre aquí.

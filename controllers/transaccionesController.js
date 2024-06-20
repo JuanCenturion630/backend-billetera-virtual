@@ -7,7 +7,7 @@ const transaccionService = new TransaccionesService(); //Instanciar la clase "us
 class TransaccionesController {
     /**
      * Controla la conexión del front con crear transacciones.
-     * @param {*} req : JSON que recibe del frontend.
+     * @param {*} req : JSON que recibe del frontend (monto, descripcion, categoria, emisor_id, receptor_id)
      * @param {*} res : JSON que se envía al frontend.
      */
     async crearTransaccion(req, res) {
@@ -34,7 +34,7 @@ class TransaccionesController {
      */
     async listarTransacciones(req, res) {
         try {
-            const { idUsuarioLogeado } = req.body;
+            const idUsuarioLogeado = req.params.id;
             const listadoTransacciones = await transaccionService.listarTransacciones(idUsuarioLogeado);
             res.status(201).json({ //Enviar respuesta al cliente. 
                 descripcion: "Listado de tus transacciones.", 

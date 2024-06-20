@@ -5,6 +5,8 @@
 const color = require('colors');
 const UsuariosRepository = require('../repositories/usuariosRepository'); //Referencio a la clase "usuariosRepository".
 const usuarioRepositorio = new UsuariosRepository(); //Instacio a la clase "usuarioRepository".
+const TransaccionesService = require('../services/transaccionesService'); //Referencio a la clase "transaccionesService".
+const transaccionesServicio = new TransaccionesService(); //Instacio a la clase "transaccionesService".
 
 class UsuariosService {
   /**
@@ -83,6 +85,25 @@ class UsuariosService {
   }
 
   /**
+   * Busca el ID del usuario en función de su email, su CVU o su alias.
+   * @param {*} busqueda: representa al email, CVU o alias.
+   * @returns: devuelve los resultados de las consultas ORM.
+   */
+  async buscarID(busqueda) {
+    try {
+      const buscarID = await usuarioRepositorio.buscarID(busqueda);
+      if (!buscarID) { return null; }
+      else { return buscarID; }
+    } catch(error) {
+      //console.error('Error en usuariosService.js (buscarUsuario):'.bgRed, error);
+      /* El throw realiza una resolución ascendente del error, es decir, la resolución del error se terceriza 
+      a la función que llamó a esta. Esta es "buscarUsuario" del servicio, que es llamada por "buscarUsuario" 
+      del controlador, por lo que el error se resolverá allí. */
+      throw new Error(error);
+    }
+  }
+
+  /**
    * 
    * @param {*} idUsuarioLogeado 
    * @returns 
@@ -110,7 +131,16 @@ class UsuariosService {
   async transferirSaldo(emisor,receptor,monto) {
     try {
       const transferir = await usuarioRepositorio.transferirSaldo(emisor,receptor,monto);
-      return transferir;
+
+      const emisorDatos = await usuarioRepositorio.buscarID(emisor);
+      const emisor_id = emisorDatos.dataValues.id;
+
+      const receptorDatos = await usuarioRepositorio.buscarID(receptor);
+      const receptor_id = receptorDatos.dataValues.id;
+
+      const transaccion = await transaccionesServicio.crearTransaccion(monto,"Transferencia entre usuarios","Transferencia",emisor_id,receptor_id);
+      
+      return { transferir, transaccion};
     } catch(error) {
       throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
                             la resolución del error se terceriza a la función que llamó a esta. Esta es 
@@ -122,20 +152,45 @@ class UsuariosService {
 
   /**
    * Sumar saldo a un usuario a través de su email, su alias o CVU.
-   * @param {*} usuario 
-   * @param {*} saldo 
+   * @param {*} usuario : email, alias o CVU.
+   * @param {*} saldo : monto.
    * @returns: devuelve los resultados de las consultas ORM.
    */
-  async sumarSaldo(usuario,saldo) {
+  async sumarSaldo(usuario,monto) {
     try {
-      const sumarSaldo = await usuarioRepositorio.sumarSaldo(usuario,saldo);
-      return sumarSaldo;
+      const saldo = await usuarioRepositorio.sumarSaldo(usuario,monto);
+      const emisor = await usuarioRepositorio.buscarID(usuario);
+      const emisor_id = emisor.dataValues.id;
+      const transaccion = await transaccionesServicio.crearTransaccion(monto,"Has agregado saldo","Sumarme saldo",emisor_id,emisor_id);
+      return { saldo, transaccion };
     } catch(error) {
       throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
                             la resolución del error se terceriza a la función que llamó a esta. Esta es 
                             "sumarSaldo" del servicio, que es llamada por "sumarSaldo" del controlador, 
                             por lo que el error se resolverá allí. */
       //console.error('Error en usuariosService.js: (sumarSaldo)', error); //Comunica por consola si el error ocurre aquí.
+    }
+  }
+
+  /**
+   * Resta saldo a un usuario a través de su email, su alias o CVU.
+   * @param {*} usuario 
+   * @param {*} monto 
+   * @returns: devuelve los resultados de las consultas ORM.
+   */
+  async restarSaldo(usuario,monto) {
+    try {
+      const saldo = await usuarioRepositorio.restarSaldo(usuario,monto);
+      const emisor = await usuarioRepositorio.buscarID(usuario);
+      const emisor_id = emisor.dataValues.id;
+      const transaccion = await transaccionesServicio.crearTransaccion(monto,"Has retirado saldo","Retirarme saldo",emisor_id,emisor_id);
+      return { saldo, transaccion };
+    } catch(error) {
+      throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
+                            la resolución del error se terceriza a la función que llamó a esta. Esta es 
+                            "restarSaldo" del servicio, que es llamada por "restarSaldo" del controlador, 
+                            por lo que el error se resolverá allí. */
+      //console.error('Error en usuariosService.js: (restarSaldo)', error); //Comunica por consola si el error ocurre aquí.
     }
   }
 }

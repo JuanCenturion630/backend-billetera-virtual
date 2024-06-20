@@ -5,17 +5,12 @@ const usuarioControlador = new UsuariosController(); //Instanciar la clase "usua
 const verifyToken = require("../middleware/verifyToken");
 
 usuariosRouter.post('/crear-usuario', usuarioControlador.crearUsuario);
-usuariosRouter.post('/login', verifyToken, usuarioControlador.login);
-usuariosRouter.post('/buscar-usuario', usuarioControlador.buscarUsuario);
-usuariosRouter.post('/listar-usuarios', usuarioControlador.listarUsuariosExcluyendoLogeado);
-usuariosRouter.post('/transferir-saldo', usuarioControlador.transferirSaldo);
-usuariosRouter.post('/sumar-saldo', usuarioControlador.sumarSaldo);
+usuariosRouter.post('/login', usuarioControlador.login);
+usuariosRouter.get('/buscar-usuario/:busqueda', usuarioControlador.buscarUsuario); //"busqueda": email, alias o CVU.
+usuariosRouter.get('/listar-usuarios/:idExcluido', usuarioControlador.listarUsuariosExcluyendoLogeado);
+
+usuariosRouter.put('/sumar-saldo', usuarioControlador.sumarSaldo);
+usuariosRouter.put('/restar-saldo', usuarioControlador.restarSaldo);
+usuariosRouter.put('/transferir-saldo', usuarioControlador.transferirSaldo);
 
 module.exports = usuariosRouter;
-
-/* app.post('/crear-usuario', (req, res) => usuarioControlador.crearUsuario(req, res)); //Endpoint de crear usuario.
-app.post('/login', (req, res) => usuarioControlador.login(req, res)); //Endpoint de login.
-app.post('/buscar-usuario', (req, res) => usuarioControlador.buscarUsuario(req, res)); //Endpoint de buscar usuario.
-app.post('/listar-usuarios', (req, res) => usuarioControlador.listarUsuariosExcluyendoLogeado(req, res)); //Endpoint de listar usuarios.
-app.post('/transferir-saldo', (req, res) => usuarioControlador.transferirSaldo(req, res)); //Endspoint de transferir.
-app.post('/sumar-saldo', (req, res) => usuarioControlador.sumarSaldo(req, res)); //Endspoint de sumar saldo. */

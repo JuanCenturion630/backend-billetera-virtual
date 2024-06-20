@@ -68,9 +68,9 @@ class UsuariosRepository {
     } //FUNCIONA.
 
     /**
-     * Ejecuta un ORM para buscar los usuarios que recibirán una transferencia de saldo.
-     * @param {*} busqueda 
-     * @returns 
+     * Ejecuta un ORM para buscar los usuarios.
+     * @param {*} busqueda : email, alias o CVU.
+     * @returns : devuelve un objeto con todos los datos del usuario encontrado.
      */
     async buscarUsuario(busqueda) {
         try {
@@ -90,6 +90,34 @@ class UsuariosRepository {
             /* El throw realiza una llamada ascendente para la resolución del error, es decir, la resolución 
             del error se terceriza a la función que llamó a esta. Esta es "buscarUsuario" del repositorio, 
             que es llamada por "buscarUsuario" del servicio, por lo que el error se resolverá allí. */
+            throw new Error(error);
+        }
+    } //FUNCIONA.
+
+    /**
+     * Ejecuta un ORM para buscar el id del usuario.
+     * @param {*} busqueda : email, alias o CVU.
+     * @returns : devuelve un objeto solo el id del usuario encontrado.
+     */
+    async buscarID(busqueda) {
+        try {
+            /* Realiza un "SELECT id FROM usuarios WHERE email=busqueda OR alias=busqueda OR cvu=busqueda" pero 
+            con ORM, con "await" esperando la respuesta y se retorna. */
+            return await usuariosORM.findOne({ 
+                where: { 
+                    [operadoresLogicos.or]: [
+                        { email: busqueda },
+                        { alias: busqueda },
+                        { cvu: busqueda }
+                    ]
+                },
+                attributes: ['id']
+            });
+        } catch (error) {
+            //console.error('Error en usuariosRepository.js (buscarID):', error);
+            /* El throw realiza una llamada ascendente para la resolución del error, es decir, la resolución 
+            del error se terceriza a la función que llamó a esta. Esta es "buscarID" del repositorio, 
+            que es llamada por "buscarID" del servicio, por lo que el error se resolverá allí. */
             throw new Error(error);
         }
     } //FUNCIONA.
@@ -141,7 +169,7 @@ class UsuariosRepository {
                 { 
                     where: {
                         [operadoresLogicos.or]: [
-                            { email: emisor },
+                            { id: emisor },
                             { alias: emisor },
                             { cvu: emisor }
                         ]
@@ -192,6 +220,35 @@ class UsuariosRepository {
             //UPDATE saldo=saldo+monto WHERE email=emisor OR cvu=emisor OR alias=emisor (resta saldo al emisor).
             return await usuariosORM.update(
                 { saldo: Sequelize.literal(`saldo + ${monto}`) },
+                { 
+                    where: {
+                        [operadoresLogicos.or]: [
+                            { email: usuario },
+                            { alias: usuario },
+                            { cvu: usuario }
+                        ]
+                    }
+                }
+            );
+        } catch (error) {
+            //console.error('Error en usuariosRepository.js (sumarSaldo):'.bgRed, error);
+            /* El throw realiza una llamada ascendente para la resolución del error, es decir, la resolución 
+            del error se terceriza a la función que llamó a esta. Esta es "sumarSaldo" del repositorio, 
+            que es llamada por "sumarSaldo" del servicio, por lo que el error se resolverá allí. */
+            throw new Error(error);
+        }
+    } //FUNCIONA.
+
+    /**
+     * Ejecuta un ORM para restar saldo a un usuario.
+     * @param {*} usuario 
+     * @param {*} saldo 
+     */
+    async restarSaldo(usuario,monto) {
+        try {
+            //UPDATE saldo=saldo+monto WHERE email=emisor OR cvu=emisor OR alias=emisor (resta saldo al emisor).
+            return await usuariosORM.update(
+                { saldo: Sequelize.literal(`saldo - ${monto}`) },
                 { 
                     where: {
                         [operadoresLogicos.or]: [
