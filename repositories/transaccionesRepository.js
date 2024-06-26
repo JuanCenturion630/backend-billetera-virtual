@@ -2,7 +2,7 @@
 //Debe solo invocar métodos ORM que emulen sentencias SQL y hacer returns. Si hace más cosas, viola la arquitectura.
 
 const color = require('colors');
-const transaccioneORM = require('../models/transacciones');
+const transaccionesORM = require('../models/transacciones');
 
 class TransaccionesRepository {
     /**
@@ -19,13 +19,13 @@ class TransaccionesRepository {
         try {
             /* Realiza un "INSERT INTO usuarios VALUES(emisor,receptor...)" pero con ORM, con "await" esperando 
             la respuesta y se retorna. */
-            return await transaccioneORM.create({ 
-                fecha,
-                monto,
-                descripcion,
-                categoria,
-                emisor_id,
-                receptor_id
+            return await transaccionesORM.create({ 
+                fecha: fecha,
+                monto: monto,
+                descripcion: descripcion,
+                categoria: categoria,
+                emisor_id: emisor_id,
+                receptor_id: receptor_id
             });
         }
         catch (error) {
@@ -45,7 +45,7 @@ class TransaccionesRepository {
         try {
             /* Realiza un "SELECT * FROM usuarios WHERE emisor_id=idUsuarioLogeado" pero con ORM, 
             con "await" esperando la respuesta y se retorna. */
-            return await transaccioneORM.findAll(
+            return await transaccionesORM.findAll(
                 { 
                     where: { 
                         emisor_id: idUsuarioLogeado

@@ -20,7 +20,7 @@ class TransaccionesService {
         try {
             let fecha = new Date();
             const nuevaTransaccion = await transaccionesRepositorio.crearTransaccion(fecha,monto,descripcion,categoria,emisor_id,receptor_id);
-            return nuevaTransaccion;
+            return nuevaTransaccion.dataValues;
         } catch(error) {
             //console.error('Error en usuariosService.js (crearUsuario):'.bgRed, error);
             /* El throw realiza una llamada ascendente para la resolución del error, es decir, la resolución del error 

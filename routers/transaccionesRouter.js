@@ -4,7 +4,7 @@ const TransaccionesController = require('../controllers/transaccionesController'
 const transaccionControlador = new TransaccionesController(); //Instanciar la clase "TransaccionesController".
 const verifyToken = require("../middleware/verifyToken");
 
-transaccionesRouter.post('/crear-transaccion', verifyToken, transaccionControlador.crearTransaccion);
-transaccionesRouter.get('/listar-transacciones/:id', verifyToken, transaccionControlador.listarTransacciones);
+transaccionesRouter.post('/crear-transaccion', transaccionControlador.crearTransaccion);
+transaccionesRouter.get('/listar-transacciones/:id', transaccionControlador.listarTransacciones);
 
 module.exports = transaccionesRouter;

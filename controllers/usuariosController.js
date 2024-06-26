@@ -56,7 +56,7 @@ class UsuariosController {
    */
   async buscarUsuario(req, res) {
     try {
-      const busqueda = req.params.busqueda; //email, alias o CVU.
+      const busqueda = req.params.busqueda; //id, email, alias o CVU.
       const resultado = await usuarioServicio.buscarUsuario(busqueda);
       res.status(201).json({
         descripcion: "Resultados encontrados.",

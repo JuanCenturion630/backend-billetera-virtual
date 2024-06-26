@@ -36,10 +36,8 @@ function definirRelaciones(orm_pk,orm_fk,fk,sk=null,tk=null) { //"=null" es igua
 
 //Un usuario puede tener muchos préstamos | un préstamo tiene solo un usuario:
 definirRelaciones(usuariosORM,prestamosORM,'usuario_id');
-
 //Un usuario emisor puede tener muchas transacciones | una transacción tiene solo un usuario emisor.
 definirRelaciones(usuariosORM,transaccionesORM,'emisor_id','id','id');
-
 //Un usuario receptor puede tener muchas transacciones | una transacción hecha tiene solo un usuario receptor.
 definirRelaciones(usuariosORM,transaccionesORM,'receptor_id','id','id');
 

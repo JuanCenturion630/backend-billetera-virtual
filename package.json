@@ -14,9 +14,11 @@
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.10.0",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "socket.io": "^4.7.5"
   }
 }

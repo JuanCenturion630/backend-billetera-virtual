@@ -53,18 +53,18 @@ class UsuariosService {
         return logearUsuario;
       }
     } catch (error) {
-      throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
-                            la resolución del error se terceriza a la función que llamó a esta. Esta es 
-                            "login" del servicio, que es llamada por "login" del controlador, 
-                            por lo que el error se resolverá allí. */
-      //console.error('Error en usuariosService.js (login):', error); //Comunica por consola si el error ocurre aquí.
+      //console.error('Error en usuariosService.js (login):', error);
+      /* El throw realiza una resolución ascendente del error, es decir, la resolución del error se terceriza a
+      la función que llamó a esta. Esta es "login" del servicio, que es llamada por "login" del controlador, 
+      por lo que el error se resolverá allí. */
+      throw new Error(error);
     }
   }
 
   /**
-   * Busca usuarios en función de su email, su CVU o su alias.
-   * @param {*} busqueda: representa al email, CVU o alias.
-   * @returns: devuelve los resultados de las consultas ORM.
+   * Busca usuarios en función de su id, email, CVU o alias.
+   * @param {*} busqueda: representa al id, email, CVU o alias.
+   * @returns: devuelve los resultados de las consultas en ORM.
    */
   async buscarUsuario(busqueda) {
     try {
@@ -73,7 +73,7 @@ class UsuariosService {
         throw new Error('No se encontraron coincidencias.'); //El throw hará una resolución ascendente.
       }
       else {
-        return buscarUsuario;
+        return buscarUsuario.dataValues; //Se devuelve un objeto con varios subobjetos. Solo te interesa "dataValues".
       }
     } catch(error) {
       //console.error('Error en usuariosService.js (buscarUsuario):'.bgRed, error);
@@ -93,7 +93,7 @@ class UsuariosService {
     try {
       const buscarID = await usuarioRepositorio.buscarID(busqueda);
       if (!buscarID) { return null; }
-      else { return buscarID; }
+      else { return buscarID.dataValues.id; }
     } catch(error) {
       //console.error('Error en usuariosService.js (buscarUsuario):'.bgRed, error);
       /* El throw realiza una resolución ascendente del error, es decir, la resolución del error se terceriza 
@@ -131,22 +131,18 @@ class UsuariosService {
   async transferirSaldo(emisor,receptor,monto) {
     try {
       const transferir = await usuarioRepositorio.transferirSaldo(emisor,receptor,monto);
-
       const emisorDatos = await usuarioRepositorio.buscarID(emisor);
       const emisor_id = emisorDatos.dataValues.id;
-
       const receptorDatos = await usuarioRepositorio.buscarID(receptor);
       const receptor_id = receptorDatos.dataValues.id;
-
       const transaccion = await transaccionesServicio.crearTransaccion(monto,"Transferencia entre usuarios","Transferencia",emisor_id,receptor_id);
-      
       return { transferir, transaccion};
     } catch(error) {
-      throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
-                            la resolución del error se terceriza a la función que llamó a esta. Esta es 
-                            "transferirSaldo" del servicio, que es llamada por "transferirSaldo" del controlador, 
-                            por lo que el error se resolverá allí. */
-      //console.error('Error en usuariosService.js: (transferirSaldo)', error); //Comunica por consola si el error ocurre aquí.
+      //console.error('Error en usuariosService.js: (transferirSaldo)', error);
+      /* El throw realiza una resolución ascendente del error, es decir, la resolución del error se terceriza 
+      a la función que llamó a esta. Esta es "transferirSaldo" del servicio, que es llamada por "transferirSaldo"
+      del controlador, por lo que el error se resolverá allí. */
+      throw new Error(error);
     }
   }
 
@@ -164,11 +160,11 @@ class UsuariosService {
       const transaccion = await transaccionesServicio.crearTransaccion(monto,"Has agregado saldo","Sumarme saldo",emisor_id,emisor_id);
       return { saldo, transaccion };
     } catch(error) {
-      throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
-                            la resolución del error se terceriza a la función que llamó a esta. Esta es 
-                            "sumarSaldo" del servicio, que es llamada por "sumarSaldo" del controlador, 
-                            por lo que el error se resolverá allí. */
-      //console.error('Error en usuariosService.js: (sumarSaldo)', error); //Comunica por consola si el error ocurre aquí.
+      //console.error('Error en usuariosService.js: (sumarSaldo)', error);
+      /* El throw realiza una resolución ascendente del error, es decir, la resolución del error se terceriza a 
+      la función que llamó a esta. Esta es "sumarSaldo" del servicio, que es llamada por "sumarSaldo" del 
+      controlador, por lo que el error se resolverá allí. */
+      throw new Error(error);
     }
   }
 
@@ -186,11 +182,11 @@ class UsuariosService {
       const transaccion = await transaccionesServicio.crearTransaccion(monto,"Has retirado saldo","Retirarme saldo",emisor_id,emisor_id);
       return { saldo, transaccion };
     } catch(error) {
-      throw new Error(error); /* El throw realiza una resolución ascendente del error, es decir, 
-                            la resolución del error se terceriza a la función que llamó a esta. Esta es 
-                            "restarSaldo" del servicio, que es llamada por "restarSaldo" del controlador, 
-                            por lo que el error se resolverá allí. */
-      //console.error('Error en usuariosService.js: (restarSaldo)', error); //Comunica por consola si el error ocurre aquí.
+      //console.error('Error en usuariosService.js: (restarSaldo)', error);
+      /* El throw realiza una resolución ascendente del error, es decir, la resolución del error se terceriza a 
+      la función que llamó a esta. Esta es "restarSaldo" del servicio, que es llamada por "restarSaldo" del 
+      controlador, por lo que el error se resolverá allí. */
+      throw new Error(error);
     }
   }
 }

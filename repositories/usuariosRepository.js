@@ -69,16 +69,17 @@ class UsuariosRepository {
 
     /**
      * Ejecuta un ORM para buscar los usuarios.
-     * @param {*} busqueda : email, alias o CVU.
+     * @param {*} busqueda : id, email, alias o CVU.
      * @returns : devuelve un objeto con todos los datos del usuario encontrado.
      */
     async buscarUsuario(busqueda) {
         try {
             /* Realiza un "SELECT * FROM usuarios WHERE email=busqueda OR alias=busqueda OR cvu=busqueda" pero 
             con ORM, con "await" esperando la respuesta y se retorna. */
-            return await usuariosORM.findAll({ 
+            return await usuariosORM.findOne({ 
                 where: { 
                     [operadoresLogicos.or]: [
+                        { id: busqueda },
                         { email: busqueda },
                         { alias: busqueda },
                         { cvu: busqueda }
