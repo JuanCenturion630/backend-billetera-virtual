@@ -35,10 +35,11 @@ class UsuariosController {
   async login(req, res) {
     try {
       const { email, contrasenia } = req.body;
-      const logearUsuario = await usuarioServicio.login(email,contrasenia);
+      const resultado = await usuarioServicio.login(email,contrasenia);
       res.status(201).json({ 
         descripcion: "Ha iniciado sesión con éxito.",
-        usuario: logearUsuario
+        usuario: resultado.logearUsuario,
+        retraso: resultado.retraso
       });
     } catch (error) {
       res.status(401).json({ 

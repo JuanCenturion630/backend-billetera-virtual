@@ -68,12 +68,13 @@ class PrestamosRepository {
         }
     }
 
-    async verPrestamosRetrasados() {
+    async verPrestamoRetrasado(usuario_id) {
         try {
-            return await prestamosORM.findAll({
+            return await prestamosORM.findOne({
                 where: {
+                    usuario_id: usuario_id,
                     vencimiento_cuota: { 
-                        [operadoresLogicos.lt]: new Date() //"vencimiento_cuota" es menor a la fecha actual, es decir, ya venció.
+                        [operadoresLogicos.lt]: new Date() //"vencimiento_cuota" es menor a la fecha actual, es decir, ya pasó, ya venció.
                     }
                 }
             });

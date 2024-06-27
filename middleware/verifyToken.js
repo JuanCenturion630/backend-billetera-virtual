@@ -4,7 +4,7 @@ const verifyToken = async (req, res, next) => {
     const authorizationHeader = req.headers.authorization || "";
 
     if (!authorizationHeader) {
-        res.status(401).send("No autorizado.");
+        return res.status(401).send("No autorizado.");
     }
 
     const token = authorizationHeader.replace("Bearer ", "");
@@ -16,13 +16,10 @@ const verifyToken = async (req, res, next) => {
     });
 
     try {
-        await verifier.verify(token).then(()=> {
-            next();
-        }).catch((err)=> {
-            res.status(401).send("No autorizado.");
-        });
+        await verifier.verify(token);
+        next();
     } catch {
-        res.status(401).send("No autorizado.");
+        return res.status(401).send("No autorizado.");
     }
 };
 

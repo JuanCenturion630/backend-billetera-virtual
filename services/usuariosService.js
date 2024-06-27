@@ -7,6 +7,8 @@ const UsuariosRepository = require('../repositories/usuariosRepository'); //Refe
 const usuarioRepositorio = new UsuariosRepository(); //Instacio a la clase "usuarioRepository".
 const TransaccionesService = require('../services/transaccionesService'); //Referencio a la clase "transaccionesService".
 const transaccionesServicio = new TransaccionesService(); //Instacio a la clase "transaccionesService".
+const prestamosService = require('../services/prestamosService');
+const prestamosServicio = new prestamosService();
 
 class UsuariosService {
   /**
@@ -46,11 +48,20 @@ class UsuariosService {
   async login(email, contrasenia) {
     try {
       const logearUsuario = await usuarioRepositorio.login(email, contrasenia);
-      if (!logearUsuario) {
-        throw new Error('No existe el usuario.'); //Lógica de negocio. El throw hará una resolución ascendente.
+      console.log("Id usuario en login del servicio usuario: ".yellow, logearUsuario.dataValues.id);
+      
+      if (logearUsuario) { //Si el usuario existe...
+        const fechaRetraso = await prestamosServicio.verPrestamoRetrasado(logearUsuario.dataValues.id);
+        if(fechaRetraso) { //Si hay un retraso de pago...
+          const retraso = await prestamosServicio.manejarRetrasoPago(logearUsuario.dataValues.id);
+          return { logearUsuario, retraso };
+        }
+        else {
+          return { logearUsuario, retraso: 'No tiene préstamos adeudados.' };
+        } 
       }
       else {
-        return logearUsuario;
+        throw new Error('No existe el usuario.'); //El throw hará una resolución ascendente.
       }
     } catch (error) {
       //console.error('Error en usuariosService.js (login):', error);
@@ -131,10 +142,8 @@ class UsuariosService {
   async transferirSaldo(emisor,receptor,monto) {
     try {
       const transferir = await usuarioRepositorio.transferirSaldo(emisor,receptor,monto);
-      const emisorDatos = await usuarioRepositorio.buscarID(emisor);
-      const emisor_id = emisorDatos.dataValues.id;
-      const receptorDatos = await usuarioRepositorio.buscarID(receptor);
-      const receptor_id = receptorDatos.dataValues.id;
+      const emisor_id = await this.buscarID(emisor);
+      const receptor_id = await this.buscarID(receptor);
       const transaccion = await transaccionesServicio.crearTransaccion(monto,"Transferencia entre usuarios","Transferencia",emisor_id,receptor_id);
       return { transferir, transaccion};
     } catch(error) {
@@ -155,8 +164,7 @@ class UsuariosService {
   async sumarSaldo(usuario,monto) {
     try {
       const saldo = await usuarioRepositorio.sumarSaldo(usuario,monto);
-      const emisor = await usuarioRepositorio.buscarID(usuario);
-      const emisor_id = emisor.dataValues.id;
+      const emisor_id = await this.buscarID(usuario);
       const transaccion = await transaccionesServicio.crearTransaccion(monto,"Has agregado saldo","Sumarme saldo",emisor_id,emisor_id);
       return { saldo, transaccion };
     } catch(error) {
@@ -177,8 +185,7 @@ class UsuariosService {
   async restarSaldo(usuario,monto) {
     try {
       const saldo = await usuarioRepositorio.restarSaldo(usuario,monto);
-      const emisor = await usuarioRepositorio.buscarID(usuario);
-      const emisor_id = emisor.dataValues.id;
+      const emisor_id = await this.buscarID(usuario);
       const transaccion = await transaccionesServicio.crearTransaccion(monto,"Has retirado saldo","Retirarme saldo",emisor_id,emisor_id);
       return { saldo, transaccion };
     } catch(error) {

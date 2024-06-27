@@ -26,7 +26,7 @@ class PrestamosService {
       //Calcular el interés y crear el préstamo en caso de no ser deudor:
       let intereses;
       let monto_cuota;
-      let vencimiento_cuota = new Date(new Date().setDate(new Date().getDate() + 30));
+      let vencimiento_cuota = new Date(new Date().setDate(new Date().getDate() - 4));
       let monto_total;
       switch (cant_cuotas) {
         case 3:
@@ -123,31 +123,33 @@ class PrestamosService {
   /**
    * 
    */
-  async manejarRetrasoPago() {
-    const prestamos = await prestamosRepositorio.verPrestamosRetrasados();
-    for (const prestamo of prestamos) {
-      /**
-       * Calcula el número de días de retraso:
-       * Se resta la fecha actual (new Date()) y la fecha de vencimiento de la cuota y se convierte la 
-       * diferencia de milisegundos a días (1000 mseg * 60 seg * 60 min * 24 hs). 
-       * Luego, se redondea hacia abajo con `Math.floor`.
-       */
-      const diasRetraso = Math.floor((new Date() - new Date(prestamo.vencimiento_cuota)) / (1000 * 60 * 60 * 24));
-      
-      if (diasRetraso > 0) {
-        if(diasRetraso===5) {
-          prestamo.intereses += 1; //Los intereses suben un 1% por cada 5 días de retraso.
-          prestamo.monto_cuota = prestamo.monto / prestamo.cant_cuotas; //Quito el viejo interés de la cuota.
-          prestamo.monto_cuota += prestamo.monto_cuota * prestamo.intereses / 100; //Se asigna el nuevo interés.
-          await prestamo.save();
-          // Notificar al usuario del retraso a través de Socket.io:
-          const usuario = await usuariosRepositorio.buscarUsuario(prestamo.usuario_id);
-          io.to(usuario.id).emit(
-            'notificacion', 
-            `Adeudas una cuota vencida. Interés adicional de ${prestamo.intereses}%`
-          );
-        }
-      }
+  async manejarRetrasoPago(usuario_id) {
+    const retraso = await this.verPrestamoRetrasado(usuario_id);
+    console.log("objeto retraso en menejarRetraso del servicio prestamos: ".yellow, retraso);
+    /**
+      * Calcula el número de días de retraso (Date() devuelve las fechas en milisegundos):
+      * Se resta la fecha actual (new Date()) y la fecha de vencimiento de la cuota y se convierte la 
+      * diferencia de milisegundos a días (1000 mseg * 60 seg * 60 min * 24 hs). 
+      * Luego, se redondea hacia abajo con `Math.floor`.
+      */
+    const diasRetraso = Math.floor((new Date() - new Date(retraso.dataValues.vencimiento_cuota)) / (1000 * 60 * 60 * 24));
+    console.log("Días de retraso: ".green, diasRetraso);
+    if (diasRetraso > 0 && diasRetraso % 5 === 0) { //Si pasan cinco días...
+      retraso.dataValues.intereses += 1; //Los intereses suben un 1% por cada 5 días de retraso.
+      retraso.dataValues.monto_cuota = retraso.dataValues.monto / retraso.dataValues.cant_cuotas; //Quito el viejo interés de la cuota.
+      retraso.dataValues.monto_cuota += retraso.dataValues.monto_cuota * retraso.dataValues.intereses / 100; //Se asigna el nuevo interés.
+      await retraso.save();
+      return { retraso, mensaje: 'Se aumentó un 1% su cuota de interés.' }
+    }
+    return { retraso, mensaje: `Venció el plazo para pagar su cuota. Se le aumentará el interés un 1% en ${5-diasRetraso} días.` }
+  }
+
+  async verPrestamoRetrasado(usuario_id) {
+    try {
+      const retraso = await prestamosRepositorio.verPrestamoRetrasado(usuario_id);
+      return retraso;
+    } catch (error) {
+      throw new Error(error);
     }
   }
 }
