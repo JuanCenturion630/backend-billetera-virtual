@@ -9,8 +9,25 @@ const TransaccionesService = require('../services/transaccionesService'); //Refe
 const transaccionesServicio = new TransaccionesService(); //Instacio a la clase "transaccionesService".
 const prestamosService = require('../services/prestamosService');
 const prestamosServicio = new prestamosService();
+const bcrypt = require('bcrypt');
 
 class UsuariosService {
+  /**
+   * Encripta las contraseñas.
+   * @returns : devuelve un hash.
+   */
+  async encriptar(password) {
+    /**
+     * Los "salt" son bytes aleatorios que se unen al hash para generar información de relleno y que la 
+     * contraseña no pueda ser deducida mediante el uso de "rainbow tables". Los "rainbow tables" son tablas
+     * que recopilan los resultados obtenidos de hash crakeados. Si tu hash se parece a un hash crackeado 
+     * puede obtenerse tu contraseña. Usa el "salt" para confundir.
+     */
+    const salt = await bcrypt.genSalt(10); //10 bytes.
+    return await bcrypt.hash(password, salt);
+  }
+
+
   /**
    * Realiza reglas de negocios (crear cvu y alias) antes de escribir en la base de datos.
    * @param {*} nombre 
@@ -25,10 +42,11 @@ class UsuariosService {
     try {
       let nombreEnMinuscula = String(nombre).toLowerCase();
       let apellidoEnMinuscula = String(apellido).toLowerCase();
-      let cvu = parseInt(dni) + parseInt(cuil);
+      let cvu = dni + cuil;
       let alias = `${nombreEnMinuscula}.${apellidoEnMinuscula}.bz`;
       let saldo = "0";
-      const nuevoUsuario = await usuarioRepositorio.crearUsuario(nombre, apellido, email, dni, cuil, contrasenia, cvu, alias, saldo);
+      let contraEncriptada = await this.encriptar(contrasenia);
+      const nuevoUsuario = await usuarioRepositorio.crearUsuario(nombre, apellido, email, dni, cuil, contraEncriptada, cvu, alias, saldo);
       return nuevoUsuario;
     } catch (error) {
       //console.error('Error en usuariosService.js (crearUsuario):', error);
@@ -47,10 +65,8 @@ class UsuariosService {
    */
   async login(email, contrasenia) {
     try {
-      const logearUsuario = await usuarioRepositorio.login(email, contrasenia);
-      console.log("Id usuario en login del servicio usuario: ".yellow, logearUsuario.dataValues.id);
-      
-      if (logearUsuario) { //Si el usuario existe...
+      const logearUsuario = await usuarioRepositorio.login(email);
+      if (logearUsuario && await bcrypt.compare(contrasenia, logearUsuario.contrasenia)) { //Si el usuario existe y su contraseña coincide con el hash...
         const fechaRetraso = await prestamosServicio.verPrestamoRetrasado(logearUsuario.dataValues.id);
         if(fechaRetraso) { //Si hay un retraso de pago...
           const retraso = await prestamosServicio.manejarRetrasoPago(logearUsuario.dataValues.id);

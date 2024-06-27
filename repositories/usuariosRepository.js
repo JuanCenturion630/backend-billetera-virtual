@@ -48,14 +48,13 @@ class UsuariosRepository {
      * @param {*} contrasenia 
      * @returns 
      */
-    async login(email, contrasenia) {
+    async login(email) {
         try {
             /* Realiza un "SELECT * FROM usuarios WHERE email=email AND cotrasenia=contrasenia LIMIT 1" pero con ORM, 
             con "await" esperando la respuesta y se retorna. */
             return await usuariosORM.findOne({ 
                 where: { 
-                    email: email,
-                    contrasenia: contrasenia
+                    email: email
                 }
             });
         } catch (error) {
